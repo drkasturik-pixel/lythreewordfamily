@@ -2,328 +2,385 @@
    WORD FAMILY TRAIN ADVENTURE
 ===================================== */
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, Helvetica, sans-serif;
-}
+/* ---------- WORDS ---------- */
 
-html,
-body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#F8F3E8;
+const atWords = [
+    { word: "cat", image: "assets/cat.jpg", family: "at" },
+    { word: "bat", image: "assets/bat.jpg", family: "at" },
+    { word: "hat", image: "assets/hat.png", family: "at" },
+    { word: "mat", image: "assets/mat.png", family: "at" },
+    { word: "rat", image: "assets/rat.png", family: "at" },
+    { word: "fat", image: "assets/fat.png", family: "at" },
+    { word: "sat", image: "assets/sat.png", family: "at" },
+    { word: "pat", image: "assets/pat.png", family: "at" },
+    { word: "chat", image: "assets/chat.png", family: "at" }
+];
+
+const anWords = [
+    { word: "fan", image: "assets/fan.png", family: "an" },
+    { word: "van", image: "assets/van.png", family: "an" },
+    { word: "pan", image: "assets/pan.png", family: "an" },
+    { word: "man", image: "assets/man.png", family: "an" },
+    { word: "can", image: "assets/can.png", family: "an" },
+    { word: "tan", image: "assets/tan.png", family: "an" },
+    { word: "ran", image: "assets/ran.png", family: "an" },
+    { word: "plan", image: "assets/plan.png", family: "an" },
+    { word: "swan", image: "assets/swan.png", family: "an" }
+];
+
+/* ---------- PATTERNS ---------- */
+
+const patterns = [
+    ["at", "at", "an"],
+    ["at", "an", "an"],
+    ["an", "at", "an"],
+    ["at", "an", "at"]
+];
+
+/* ---------- DOM ---------- */
+
+const splashScreen = document.getElementById("splashScreen");
+const gameContainer = document.getElementById("gameContainer");
+
+const wordCard = document.getElementById("wordCard");
+const wordImage = document.getElementById("wordImage");
+
+const atBasket = document.getElementById("atBasket");
+const anBasket = document.getElementById("anBasket");
+
+const scoreText = document.getElementById("score");
+
+const feedback = document.getElementById("feedback");
+
+const endScreen = document.getElementById("endScreen");
+const replayBtn = document.getElementById("replayBtn");
+
+const correctSound = document.getElementById("correctSound");
+const wrongSound = document.getElementById("wrongSound");
+const backgroundMusic = document.getElementById("backgroundMusic");
+
+/* ---------- VARIABLES ---------- */
+
+let gameWords = [];
+let currentIndex = 0;
+let score = 0;
+let dragging = false;
+
+/* =====================================
+   SHUFFLE
+===================================== */
+
+function shuffle(array) {
+
+    for (let i = array.length - 1; i > 0; i--) {
+
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+
+    return array;
 }
 
 /* =====================================
-   SPLASH SCREEN
+   SPEECH
 ===================================== */
 
-#splashScreen{
-    position:fixed;
-    inset:0;
-    background:#ffffff;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:9999;
-    transition:opacity 1s ease;
-}
+function speak(text, callback = null) {
 
-#logo{
-    width:min(350px,80%);
-    max-width:350px;
+    try {
+
+        window.speechSynthesis.cancel();
+
+        const utterance =
+            new SpeechSynthesisUtterance(text);
+
+        utterance.rate = 0.85;
+        utterance.pitch = 1;
+
+        if (callback) {
+            utterance.onend = callback;
+        }
+
+        window.speechSynthesis.speak(utterance);
+
+    } catch (error) {
+
+        if (callback) {
+            callback();
+        }
+    }
 }
 
 /* =====================================
-   GAME CONTAINER
+   BUILD WORD ORDER
 ===================================== */
 
-#gameContainer{
-    width:100%;
-    height:100vh;
-    padding:10px;
-    display:none;
-    flex-direction:column;
-    justify-content:space-between;
+function buildWordSequence() {
+
+    const atPool = shuffle([...atWords]);
+    const anPool = shuffle([...anWords]);
+
+    const pattern =
+        patterns[
+            Math.floor(
+                Math.random() * patterns.length
+            )
+        ];
+
+    gameWords = [];
+
+    while (atPool.length || anPool.length) {
+
+        for (const family of pattern) {
+
+            if (family === "at" && atPool.length) {
+                gameWords.push(atPool.shift());
+            }
+
+            if (family === "an" && anPool.length) {
+                gameWords.push(anPool.shift());
+            }
+        }
+    }
 }
 
 /* =====================================
-   HEADER
+   LOAD WORD
 ===================================== */
 
-header{
-    text-align:center;
-}
+function loadWord() {
 
-h1{
-    color:#2E6F95;
-    font-size:clamp(1.5rem,3vw,2.4rem);
-    margin-bottom:8px;
-}
+    if (currentIndex >= gameWords.length) {
 
-#instructions{
-    color:#333;
-    font-size:clamp(0.9rem,2vw,1.1rem);
-    font-weight:bold;
-    line-height:1.4;
-    margin-bottom:8px;
-}
+        finishGame();
+        return;
+    }
 
-#score{
-    font-size:1.1rem;
-    font-weight:bold;
-    color:#444;
-}
+    const current = gameWords[currentIndex];
 
-/* =====================================
-   WORD AREA
-===================================== */
+    wordCard.textContent = current.word;
 
-#wordArea{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    gap:12px;
-}
+    wordImage.src = current.image;
 
-#wordImage{
-    max-width:220px;
-    max-height:140px;
-    object-fit:contain;
-    user-select:none;
-    pointer-events:none;
-}
+    scoreText.textContent =
+        `Score: ${score} / ${gameWords.length}`;
 
-#wordCard{
-    min-width:140px;
-    text-align:center;
-
-    background:#FFF7D6;
-    border:4px solid #D8B56A;
-
-    border-radius:16px;
-
-    padding:14px 30px;
-
-    font-size:2rem;
-    font-weight:bold;
-
-    color:#333;
-
-    cursor:grab;
-    touch-action:none;
-
-    box-shadow:
-    0 4px 10px rgba(0,0,0,0.15);
-}
-
-#wordCard:active{
-    cursor:grabbing;
-}
-
-/* =====================================
-   BASKETS
-===================================== */
-
-#basketArea{
-    display:flex;
-    justify-content:space-evenly;
-    align-items:center;
-    gap:20px;
-    margin-bottom:10px;
-}
-
-.basket{
-    width:42%;
-    max-width:280px;
-    position:relative;
-}
-
-.basket img{
-    width:100%;
-    max-height:180px;
-    object-fit:contain;
-    pointer-events:none;
-}
-
-.basketText{
-    position:absolute;
-    top:48%;
-    left:50%;
-    transform:translate(-50%,-50%);
-
-    color:white;
-    font-weight:bold;
-    font-size:2rem;
-
-    text-shadow:
-    2px 2px 4px rgba(0,0,0,0.7);
+    setTimeout(() => {
+        speak(current.word);
+    }, 300);
 }
 
 /* =====================================
    FEEDBACK
 ===================================== */
 
-#feedback{
-    position:fixed;
-    inset:0;
+function showFeedback(correct) {
 
-    display:none;
-    justify-content:center;
-    align-items:center;
+    feedback.style.display = "flex";
 
-    font-size:6rem;
+    if (correct) {
 
-    z-index:5000;
+        feedback.className = "correct";
+        feedback.innerHTML = "👏👏👏";
 
-    pointer-events:none;
-}
+        correctSound.currentTime = 0;
+        correctSound.play();
 
-.correct{
-    color:#2E7D32;
-}
+    } else {
 
-.wrong{
-    color:#D32F2F;
-}
+        feedback.className = "wrong";
+        feedback.innerHTML = "❌";
 
-/* =====================================
-   END SCREEN
-===================================== */
+        wrongSound.currentTime = 0;
+        wrongSound.play();
+    }
 
-#endScreen{
-    position:fixed;
-    inset:0;
+    setTimeout(() => {
 
-    background:white;
+        feedback.style.display = "none";
 
-    display:none;
-
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-
-    z-index:6000;
-}
-
-#endScreen h2{
-    color:#2E6F95;
-    font-size:2rem;
-    margin-bottom:15px;
-}
-
-#endScreen p{
-    font-size:1.2rem;
-    margin-bottom:20px;
-}
-
-#replayBtn{
-    border:none;
-
-    background:#2E6F95;
-    color:white;
-
-    padding:14px 28px;
-
-    border-radius:12px;
-
-    font-size:1.1rem;
-    font-weight:bold;
-
-    cursor:pointer;
-}
-
-#replayBtn:hover{
-    transform:scale(1.05);
+    }, 800);
 }
 
 /* =====================================
-   TABLETS
+   CHECK ANSWER
 ===================================== */
 
-@media(max-width:900px){
+function checkAnswer(family) {
 
-    #wordImage{
-        max-height:120px;
+    const current = gameWords[currentIndex];
+
+    if (current.family === family) {
+
+        score++;
+
+        showFeedback(true);
+
+        currentIndex++;
+
+        setTimeout(loadWord, 900);
+
+    } else {
+
+        showFeedback(false);
     }
-
-    #wordCard{
-        font-size:1.7rem;
-    }
-
-    .basketText{
-        font-size:1.7rem;
-    }
-
 }
 
 /* =====================================
-   MOBILE
+   HIT TEST
 ===================================== */
 
-@media(max-width:600px){
+function isInside(element, x, y) {
 
-    h1{
-        font-size:1.3rem;
-    }
+    const rect =
+        element.getBoundingClientRect();
 
-    #instructions{
-        font-size:0.9rem;
-    }
-
-    #score{
-        font-size:1rem;
-    }
-
-    #wordImage{
-        max-height:100px;
-        max-width:170px;
-    }
-
-    #wordCard{
-        font-size:1.4rem;
-        padding:12px 24px;
-    }
-
-    .basket{
-        width:45%;
-    }
-
-    .basketText{
-        font-size:1.3rem;
-    }
-
-    #feedback{
-        font-size:5rem;
-    }
-
+    return (
+        x >= rect.left &&
+        x <= rect.right &&
+        y >= rect.top &&
+        y <= rect.bottom
+    );
 }
 
 /* =====================================
-   SMALL HEIGHT DEVICES
+   DRAG + TOUCH
 ===================================== */
 
-@media(max-height:700px){
+wordCard.addEventListener("pointerdown", (e) => {
 
-    #wordImage{
-        max-height:90px;
+    dragging = true;
+
+    wordCard.setPointerCapture(e.pointerId);
+});
+
+wordCard.addEventListener("pointermove", (e) => {
+
+    if (!dragging) return;
+
+    wordCard.style.position = "fixed";
+    wordCard.style.zIndex = "5000";
+
+    wordCard.style.left =
+        (e.clientX - 60) + "px";
+
+    wordCard.style.top =
+        (e.clientY - 30) + "px";
+});
+
+wordCard.addEventListener("pointerup", (e) => {
+
+    dragging = false;
+
+    if (
+        isInside(
+            atBasket,
+            e.clientX,
+            e.clientY
+        )
+    ) {
+        checkAnswer("at");
     }
 
-    .basket img{
-        max-height:140px;
+    else if (
+        isInside(
+            anBasket,
+            e.clientX,
+            e.clientY
+        )
+    ) {
+        checkAnswer("an");
     }
 
-    #wordCard{
-        font-size:1.3rem;
-    }
+    wordCard.style.position = "static";
+    wordCard.style.zIndex = "1";
+});
 
-    .basketText{
-        font-size:1.2rem;
-    }
+/* =====================================
+   END GAME
+===================================== */
 
+function finishGame() {
+
+    endScreen.style.display = "flex";
+
+    speak(
+        "Fantastic! You sorted all the words."
+    );
 }
+
+/* =====================================
+   START GAME
+===================================== */
+
+function startGame() {
+
+    buildWordSequence();
+
+    currentIndex = 0;
+    score = 0;
+
+    scoreText.textContent =
+        "Score: 0 / 18";
+
+    loadWord();
+
+    const intro =
+
+        "Welcome to Word Family Train Adventure. " +
+        "Drag and drop the word into the correct basket. " +
+        "Put at words in the at basket. " +
+        "Put an words in the an basket. " +
+        "Let's begin.";
+
+    speak(intro, () => {
+
+        backgroundMusic.volume = 0.2;
+
+        backgroundMusic.play()
+            .catch(() => { });
+    });
+}
+
+/* =====================================
+   REPLAY
+===================================== */
+
+replayBtn.addEventListener(
+    "click",
+    () => {
+
+        endScreen.style.display = "none";
+
+        backgroundMusic.currentTime = 0;
+
+        startGame();
+    }
+);
+
+/* =====================================
+   SPLASH SCREEN
+===================================== */
+
+window.addEventListener("load", () => {
+
+    gameContainer.style.display = "none";
+
+    setTimeout(() => {
+
+        splashScreen.style.opacity = "0";
+
+        setTimeout(() => {
+
+            splashScreen.style.display = "none";
+
+            gameContainer.style.display =
+                "flex";
+
+            startGame();
+
+        }, 1000);
+
+    }, 5000);
+});
