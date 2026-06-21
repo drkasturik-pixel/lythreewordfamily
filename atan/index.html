@@ -2,141 +2,166 @@
 <html lang="en">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Word Family Train Adventure</title>
+    <title>Word Family Train Adventure</title>
 
-<link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- SPLASH SCREEN -->
+    <!-- SPLASH SCREEN -->
 
-<div id="splashScreen">
-
-    <img
-        src="assets/innovine-logo.png"
-        alt="Innovine Logo"
-        id="logo">
-
-</div>
-
-<!-- MAIN GAME -->
-
-<div id="gameContainer">
-
-    <header>
-
-        <h1>Word Family Train Adventure</h1>
-
-        <div id="instructions">
-
-            Drag and drop the word into the correct basket.<br>
-
-            Put -at words in the -at basket.<br>
-
-            Put -an words in the -an basket.
-
-        </div>
-
-        <div id="score">
-            Score: 0 / 18
-        </div>
-
-    </header>
-
-    <!-- WORD AREA -->
-
-    <section id="wordArea">
+    <div id="splashScreen">
 
         <img
-            id="wordImage"
-            draggable="false">
+            id="logo"
+            src="assets/innovine-logo.png"
+            alt="Innovine Logo">
 
-        <div
-            id="wordCard"
-            draggable="false">
-        </div>
+    </div>
 
-    </section>
+    <!-- GAME CONTAINER -->
 
-    <!-- BASKETS -->
+    <div id="gameContainer">
 
-    <section id="basketArea">
+        <header>
 
-        <div
-            class="basket"
-            id="atBasket">
+            <h1>🚂 Word Family Train Adventure</h1>
 
-            <img
-                src="assets/basket.png">
+            <div id="instructions">
 
-            <div class="basketText">
-                -AT
+                Drag and drop the word into the correct basket.<br>
+
+                Put <strong>-at</strong> words in the
+                <strong>-at</strong> basket.<br>
+
+                Put <strong>-an</strong> words in the
+                <strong>-an</strong> basket.
+
             </div>
 
-        </div>
-
-        <div
-            class="basket"
-            id="anBasket">
-
-            <img
-                src="assets/basket.png">
-
-            <div class="basketText">
-                -AN
+            <div id="score">
+                Score: 0 / 18
             </div>
 
-        </div>
+        </header>
 
-    </section>
+        <!-- WORD DISPLAY -->
 
-</div>
+        <section id="wordArea">
 
-<!-- FEEDBACK -->
+            <img
+                id="wordImage"
+                src=""
+                alt="Word Image"
+                draggable="false">
 
-<div id="feedback"></div>
+            <div
+                id="wordCard"
+                draggable="false">
 
-<!-- END SCREEN -->
+            </div>
 
-<div id="endScreen">
+        </section>
 
-    <h2>Fantastic!</h2>
+        <!-- BASKETS -->
 
-    <p>
-        You sorted all the words!
-    </p>
+        <section id="basketArea">
 
-    <button id="replayBtn">
+            <div
+                class="basket"
+                id="atBasket">
 
-        Replay
+                <img
+                    src="assets/basket.png"
+                    alt="-at basket">
 
-    </button>
+                <div class="basketText">
+                    -AT
+                </div>
 
-</div>
+            </div>
 
-<!-- AUDIO -->
+            <div
+                class="basket"
+                id="anBasket">
 
-<audio
-    id="correctSound"
-    src="assets/correct.mp3">
-</audio>
+                <img
+                    src="assets/basket.png"
+                    alt="-an basket">
 
-<audio
-    id="wrongSound"
-    src="assets/wrong.mp3">
-</audio>
+                <div class="basketText">
+                    -AN
+                </div>
 
-<audio
-    id="backgroundMusic"
-    src="assets/background-music.mp3"
-    loop>
-</audio>
+            </div>
 
-<script src="script.js"></script>
+        </section>
+
+    </div>
+
+    <!-- FEEDBACK -->
+
+    <div id="feedback"></div>
+
+    <!-- END SCREEN -->
+
+    <div id="endScreen">
+
+        <h2>🎉 Fantastic!</h2>
+
+        <p>
+            You sorted all the words!
+        </p>
+
+        <button id="replayBtn">
+
+            🔄 Replay
+
+        </button>
+
+    </div>
+
+    <!-- AUDIO -->
+
+    <audio
+        id="correctSound"
+        preload="auto">
+
+        <source
+            src="assets/correct.mp3"
+            type="audio/mpeg">
+
+    </audio>
+
+    <audio
+        id="wrongSound"
+        preload="auto">
+
+        <source
+            src="assets/wrong.mp3"
+            type="audio/mpeg">
+
+    </audio>
+
+    <audio
+        id="backgroundMusic"
+        preload="auto"
+        loop>
+
+        <source
+            src="assets/background-music.mp3"
+            type="audio/mpeg">
+
+    </audio>
+
+    <!-- SCRIPT -->
+
+    <script src="script.js"></script>
 
 </body>
+
 </html>
