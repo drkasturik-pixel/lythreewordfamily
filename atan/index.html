@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Word Family Train Adventure</title>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- SPLASH SCREEN -->
+
+<div id="splashScreen">
+
+    <img
+        src="assets/innovine-logo.png"
+        alt="Innovine Logo"
+        id="logo">
+
+</div>
+
+<!-- MAIN GAME -->
+
+<div id="gameContainer">
+
+    <header>
+
+        <h1>Word Family Train Adventure</h1>
+
+        <div id="instructions">
+
+            Drag and drop the word into the correct basket.<br>
+
+            Put -at words in the -at basket.<br>
+
+            Put -an words in the -an basket.
+
+        </div>
+
+        <div id="score">
+            Score: 0 / 18
+        </div>
+
+    </header>
+
+    <!-- WORD AREA -->
+
+    <section id="wordArea">
+
+        <img
+            id="wordImage"
+            draggable="false">
+
+        <div
+            id="wordCard"
+            draggable="false">
+        </div>
+
+    </section>
+
+    <!-- BASKETS -->
+
+    <section id="basketArea">
+
+        <div
+            class="basket"
+            id="atBasket">
+
+            <img
+                src="assets/basket.png">
+
+            <div class="basketText">
+                -AT
+            </div>
+
+        </div>
+
+        <div
+            class="basket"
+            id="anBasket">
+
+            <img
+                src="assets/basket.png">
+
+            <div class="basketText">
+                -AN
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+<!-- FEEDBACK -->
+
+<div id="feedback"></div>
+
+<!-- END SCREEN -->
+
+<div id="endScreen">
+
+    <h2>Fantastic!</h2>
+
+    <p>
+        You sorted all the words!
+    </p>
+
+    <button id="replayBtn">
+
+        Replay
+
+    </button>
+
+</div>
+
+<!-- AUDIO -->
+
+<audio
+    id="correctSound"
+    src="assets/correct.mp3">
+</audio>
+
+<audio
+    id="wrongSound"
+    src="assets/wrong.mp3">
+</audio>
+
+<audio
+    id="backgroundMusic"
+    src="assets/background-music.mp3"
+    loop>
+</audio>
+
+<script src="script.js"></script>
+
+</body>
+</html>
