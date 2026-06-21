@@ -1,474 +1,329 @@
-/* ==========================================
+/* =====================================
    WORD FAMILY TRAIN ADVENTURE
-   SCRIPT.JS
-========================================== */
+===================================== */
 
-/* ---------- WORD DATA ---------- */
-
-const atWords = [
-    { word:"cat", image:"assets/cat.jpg", family:"at" },
-    { word:"bat", image:"assets/bat.jpg", family:"at" },
-    { word:"hat", image:"assets/hat.png", family:"at" },
-    { word:"mat", image:"assets/mat.png", family:"at" },
-    { word:"rat", image:"assets/rat.png", family:"at" },
-    { word:"fat", image:"assets/fat.png", family:"at" },
-    { word:"sat", image:"assets/sat.png", family:"at" },
-    { word:"pat", image:"assets/pat.png", family:"at" },
-    { word:"chat", image:"assets/Chat.png", family:"at" }
-];
-
-const anWords = [
-    { word:"fan", image:"assets/fan.png", family:"an" },
-    { word:"van", image:"assets/van.png", family:"an" },
-    { word:"pan", image:"assets/pan.png", family:"an" },
-    { word:"man", image:"assets/man.png", family:"an" },
-    { word:"can", image:"assets/can.png", family:"an" },
-    { word:"tan", image:"assets/tan.png", family:"an" },
-    { word:"ran", image:"assets/ran.png", family:"an" },
-    { word:"plan", image:"assets/plan.png", family:"an" },
-    { word:"swan", image:"assets/swan.png", family:"an" }
-];
-
-/* ---------- PATTERNS ---------- */
-
-const patterns = [
-    ["at","at","an"],
-    ["at","an","an"],
-    ["an","at","an"],
-    ["at","an","at"]
-];
-
-/* ---------- DOM ---------- */
-
-const splashScreen = document.getElementById("splashScreen");
-const gameContainer = document.getElementById("gameContainer");
-
-const wordCard = document.getElementById("wordCard");
-const wordImage = document.getElementById("wordImage");
-
-const atBasket = document.getElementById("atBasket");
-const anBasket = document.getElementById("anBasket");
-
-const scoreText = document.getElementById("score");
-
-const feedback = document.getElementById("feedback");
-
-const endScreen = document.getElementById("endScreen");
-const replayBtn = document.getElementById("replayBtn");
-
-const correctSound =
-document.getElementById("correctSound");
-
-const wrongSound =
-document.getElementById("wrongSound");
-
-const backgroundMusic =
-document.getElementById("backgroundMusic");
-
-/* ---------- GAME VARIABLES ---------- */
-
-let gameWords = [];
-
-let currentIndex = 0;
-
-let score = 0;
-
-let dragActive = false;
-
-/* ==========================================
-   UTILITY FUNCTIONS
-========================================== */
-
-function shuffle(array){
-
-    for(let i=array.length-1;i>0;i--){
-
-        const j =
-        Math.floor(Math.random()*(i+1));
-
-        [array[i],array[j]] =
-        [array[j],array[i];
-    }
-
-    return array;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
 }
 
-/* ==========================================
-   SPEECH
-========================================== */
-
-function speak(text, callback=null){
-
-    speechSynthesis.cancel();
-
-    const utterance =
-    new SpeechSynthesisUtterance(text);
-
-    utterance.rate = 0.85;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-
-    if(callback){
-
-        utterance.onend = callback;
-
-    }
-
-    speechSynthesis.speak(utterance);
+html,
+body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#F8F3E8;
 }
 
-/* ==========================================
-   BUILD RANDOM SEQUENCE
-========================================== */
-
-function buildWordSequence(){
-
-    let atPool = shuffle([...atWords]);
-
-    let anPool = shuffle([...anWords]);
-
-    const pattern =
-    patterns[
-        Math.floor(
-            Math.random()*patterns.length
-        )
-    ];
-
-    gameWords = [];
-
-    while(atPool.length || anPool.length){
-
-        for(const family of pattern){
-
-            if(
-                family==="at" &&
-                atPool.length
-            ){
-
-                gameWords.push(
-                    atPool.shift()
-                );
-            }
-
-            if(
-                family==="an" &&
-                anPool.length
-            ){
-
-                gameWords.push(
-                    anPool.shift()
-                );
-            }
-
-        }
-
-    }
-
-}
-
-/* ==========================================
-   LOAD WORD
-========================================== */
-
-function loadWord(){
-
-    if(currentIndex >= gameWords.length){
-
-        finishGame();
-
-        return;
-    }
-
-    const current =
-    gameWords[currentIndex];
-
-    wordCard.textContent =
-    current.word;
-
-    wordImage.src =
-    current.image;
-
-    setTimeout(()=>{
-
-        speak(current.word);
-
-    },400);
-
-    scoreText.textContent =
-    `Score: ${score} / ${gameWords.length}`;
-}
-
-/* ==========================================
-   FEEDBACK
-========================================== */
-
-function showFeedback(correct){
-
-    feedback.style.display = "flex";
-
-    if(correct){
-
-        feedback.className =
-        "correct";
-
-        feedback.innerHTML =
-        "👏👏👏";
-
-        correctSound.currentTime = 0;
-
-        correctSound.play();
-
-    }
-    else{
-
-        feedback.className =
-        "wrong";
-
-        feedback.innerHTML =
-        "❌";
-
-        wrongSound.currentTime = 0;
-
-        wrongSound.play();
-
-    }
-
-    setTimeout(()=>{
-
-        feedback.style.display =
-        "none";
-
-    },800);
-
-}
-
-/* ==========================================
-   CHECK ANSWER
-========================================== */
-
-function checkAnswer(selectedFamily){
-
-    const current =
-    gameWords[currentIndex];
-
-    if(
-        current.family ===
-        selectedFamily
-    ){
-
-        score++;
-
-        showFeedback(true);
-
-        currentIndex++;
-
-        setTimeout(()=>{
-
-            loadWord();
-
-        },900);
-
-    }
-    else{
-
-        showFeedback(false);
-
-    }
-
-}
-
-/* ==========================================
-   BASKET HIT TEST
-========================================== */
-
-function isInsideBasket(
-    basket,
-    x,
-    y
-){
-
-    const rect =
-    basket.getBoundingClientRect();
-
-    return (
-        x >= rect.left &&
-        x <= rect.right &&
-        y >= rect.top &&
-        y <= rect.bottom
-    );
-
-}
-
-/* ==========================================
-   TOUCH + DRAG SUPPORT
-========================================== */
-
-wordCard.addEventListener(
-    "pointerdown",
-    e=>{
-
-    dragActive = true;
-
-    wordCard.setPointerCapture(
-        e.pointerId
-    );
-
-});
-
-wordCard.addEventListener(
-    "pointermove",
-    e=>{
-
-    if(!dragActive) return;
-
-    wordCard.style.position =
-    "fixed";
-
-    wordCard.style.left =
-    (e.clientX-60)+"px";
-
-    wordCard.style.top =
-    (e.clientY-30)+"px";
-
-});
-
-wordCard.addEventListener(
-    "pointerup",
-    e=>{
-
-    dragActive = false;
-
-    if(
-        isInsideBasket(
-            atBasket,
-            e.clientX,
-            e.clientY
-        )
-    ){
-
-        checkAnswer("at");
-
-    }
-
-    else if(
-        isInsideBasket(
-            anBasket,
-            e.clientX,
-            e.clientY
-        )
-    ){
-
-        checkAnswer("an");
-
-    }
-
-    wordCard.style.position =
-    "static";
-
-});
-
-/* ==========================================
-   FINISH GAME
-========================================== */
-
-function finishGame(){
-
-    endScreen.style.display =
-    "flex";
-
-    speak(
-        "Fantastic. You sorted all the words."
-    );
-
-}
-
-/* ==========================================
-   START GAME
-========================================== */
-
-function startGame(){
-
-    buildWordSequence();
-
-    currentIndex = 0;
-
-    score = 0;
-
-    loadWord();
-
-    const instructions =
-
-    "Welcome to Word Family Train Adventure. " +
-
-    "Drag and drop the word into the correct basket. " +
-
-    "Put at words in the at basket. " +
-
-    "Put an words in the an basket. " +
-
-    "Let's begin.";
-
-    speak(
-        instructions,
-        ()=>{
-
-            backgroundMusic.volume =
-            0.20;
-
-            backgroundMusic.play()
-            .catch(()=>{});
-
-        }
-    );
-
-}
-
-/* ==========================================
-   REPLAY
-========================================== */
-
-replayBtn.addEventListener(
-    "click",
-    ()=>{
-
-    endScreen.style.display =
-    "none";
-
-    buildWordSequence();
-
-    currentIndex = 0;
-
-    score = 0;
-
-    loadWord();
-
-});
-/* ==========================================
+/* =====================================
    SPLASH SCREEN
-========================================== */
+===================================== */
 
-window.onload = ()=>{
+#splashScreen{
+    position:fixed;
+    inset:0;
+    background:#ffffff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+    transition:opacity 1s ease;
+}
 
-    gameContainer.style.display =
-    "none";
+#logo{
+    width:min(350px,80%);
+    max-width:350px;
+}
 
-    setTimeout(()=>{
+/* =====================================
+   GAME CONTAINER
+===================================== */
 
-        splashScreen.style.opacity =
-        "0";
+#gameContainer{
+    width:100%;
+    height:100vh;
+    padding:10px;
+    display:none;
+    flex-direction:column;
+    justify-content:space-between;
+}
 
-        setTimeout(()=>{
+/* =====================================
+   HEADER
+===================================== */
 
-            splashScreen.style.display =
-            "none";
+header{
+    text-align:center;
+}
 
-            gameContainer.style.display =
-            "flex";
+h1{
+    color:#2E6F95;
+    font-size:clamp(1.5rem,3vw,2.4rem);
+    margin-bottom:8px;
+}
 
-            startGame();
+#instructions{
+    color:#333;
+    font-size:clamp(0.9rem,2vw,1.1rem);
+    font-weight:bold;
+    line-height:1.4;
+    margin-bottom:8px;
+}
 
-        },1000);
+#score{
+    font-size:1.1rem;
+    font-weight:bold;
+    color:#444;
+}
 
-    },5000);
+/* =====================================
+   WORD AREA
+===================================== */
 
-};
+#wordArea{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:12px;
+}
+
+#wordImage{
+    max-width:220px;
+    max-height:140px;
+    object-fit:contain;
+    user-select:none;
+    pointer-events:none;
+}
+
+#wordCard{
+    min-width:140px;
+    text-align:center;
+
+    background:#FFF7D6;
+    border:4px solid #D8B56A;
+
+    border-radius:16px;
+
+    padding:14px 30px;
+
+    font-size:2rem;
+    font-weight:bold;
+
+    color:#333;
+
+    cursor:grab;
+    touch-action:none;
+
+    box-shadow:
+    0 4px 10px rgba(0,0,0,0.15);
+}
+
+#wordCard:active{
+    cursor:grabbing;
+}
+
+/* =====================================
+   BASKETS
+===================================== */
+
+#basketArea{
+    display:flex;
+    justify-content:space-evenly;
+    align-items:center;
+    gap:20px;
+    margin-bottom:10px;
+}
+
+.basket{
+    width:42%;
+    max-width:280px;
+    position:relative;
+}
+
+.basket img{
+    width:100%;
+    max-height:180px;
+    object-fit:contain;
+    pointer-events:none;
+}
+
+.basketText{
+    position:absolute;
+    top:48%;
+    left:50%;
+    transform:translate(-50%,-50%);
+
+    color:white;
+    font-weight:bold;
+    font-size:2rem;
+
+    text-shadow:
+    2px 2px 4px rgba(0,0,0,0.7);
+}
+
+/* =====================================
+   FEEDBACK
+===================================== */
+
+#feedback{
+    position:fixed;
+    inset:0;
+
+    display:none;
+    justify-content:center;
+    align-items:center;
+
+    font-size:6rem;
+
+    z-index:5000;
+
+    pointer-events:none;
+}
+
+.correct{
+    color:#2E7D32;
+}
+
+.wrong{
+    color:#D32F2F;
+}
+
+/* =====================================
+   END SCREEN
+===================================== */
+
+#endScreen{
+    position:fixed;
+    inset:0;
+
+    background:white;
+
+    display:none;
+
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    z-index:6000;
+}
+
+#endScreen h2{
+    color:#2E6F95;
+    font-size:2rem;
+    margin-bottom:15px;
+}
+
+#endScreen p{
+    font-size:1.2rem;
+    margin-bottom:20px;
+}
+
+#replayBtn{
+    border:none;
+
+    background:#2E6F95;
+    color:white;
+
+    padding:14px 28px;
+
+    border-radius:12px;
+
+    font-size:1.1rem;
+    font-weight:bold;
+
+    cursor:pointer;
+}
+
+#replayBtn:hover{
+    transform:scale(1.05);
+}
+
+/* =====================================
+   TABLETS
+===================================== */
+
+@media(max-width:900px){
+
+    #wordImage{
+        max-height:120px;
+    }
+
+    #wordCard{
+        font-size:1.7rem;
+    }
+
+    .basketText{
+        font-size:1.7rem;
+    }
+
+}
+
+/* =====================================
+   MOBILE
+===================================== */
+
+@media(max-width:600px){
+
+    h1{
+        font-size:1.3rem;
+    }
+
+    #instructions{
+        font-size:0.9rem;
+    }
+
+    #score{
+        font-size:1rem;
+    }
+
+    #wordImage{
+        max-height:100px;
+        max-width:170px;
+    }
+
+    #wordCard{
+        font-size:1.4rem;
+        padding:12px 24px;
+    }
+
+    .basket{
+        width:45%;
+    }
+
+    .basketText{
+        font-size:1.3rem;
+    }
+
+    #feedback{
+        font-size:5rem;
+    }
+
+}
+
+/* =====================================
+   SMALL HEIGHT DEVICES
+===================================== */
+
+@media(max-height:700px){
+
+    #wordImage{
+        max-height:90px;
+    }
+
+    .basket img{
+        max-height:140px;
+    }
+
+    #wordCard{
+        font-size:1.3rem;
+    }
+
+    .basketText{
+        font-size:1.2rem;
+    }
+
+}
