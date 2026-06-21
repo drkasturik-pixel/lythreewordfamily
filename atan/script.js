@@ -1,8 +1,6 @@
 /* =====================================
-   WORD FAMILY TRAIN ADVENTURE
+   WORD FAMILY
 ===================================== */
-
-/* ---------- WORDS ---------- */
 
 const atWords = [
     { word: "cat", image: "assets/cat.jpg", family: "at" },
@@ -28,8 +26,6 @@ const anWords = [
     { word: "swan", image: "assets/swan.png", family: "an" }
 ];
 
-/* ---------- PATTERNS ---------- */
-
 const patterns = [
     ["at", "at", "an"],
     ["at", "an", "an"],
@@ -37,181 +33,275 @@ const patterns = [
     ["at", "an", "at"]
 ];
 
-/* ---------- DOM ---------- */
+const splashScreen =
+document.getElementById("splashScreen");
 
-const splashScreen = document.getElementById("splashScreen");
-const gameContainer = document.getElementById("gameContainer");
+const gameContainer =
+document.getElementById("gameContainer");
 
-const wordCard = document.getElementById("wordCard");
-const wordImage = document.getElementById("wordImage");
+const wordCard =
+document.getElementById("wordCard");
 
-const atBasket = document.getElementById("atBasket");
-const anBasket = document.getElementById("anBasket");
+const wordImage =
+document.getElementById("wordImage");
 
-const scoreText = document.getElementById("score");
+const atBasket =
+document.getElementById("atBasket");
 
-const feedback = document.getElementById("feedback");
+const anBasket =
+document.getElementById("anBasket");
 
-const endScreen = document.getElementById("endScreen");
-const replayBtn = document.getElementById("replayBtn");
+const scoreText =
+document.getElementById("score");
 
-const correctSound = document.getElementById("correctSound");
-const wrongSound = document.getElementById("wrongSound");
-const backgroundMusic = document.getElementById("backgroundMusic");
+const feedback =
+document.getElementById("feedback");
 
-/* ---------- VARIABLES ---------- */
+const endScreen =
+document.getElementById("endScreen");
+
+const replayBtn =
+document.getElementById("replayBtn");
+
+const correctSound =
+document.getElementById("correctSound");
+
+const wrongSound =
+document.getElementById("wrongSound");
+
+const backgroundMusic =
+document.getElementById("backgroundMusic");
+
+const instructionAudio =
+document.getElementById("instructionAudio");
 
 let gameWords = [];
 let currentIndex = 0;
 let score = 0;
 let dragging = false;
 
-/* =====================================
-   SHUFFLE
-===================================== */
+function shuffle(array){
 
-function shuffle(array) {
+    for(let i=array.length-1;i>0;i--){
 
-    for (let i = array.length - 1; i > 0; i--) {
+        const j =
+        Math.floor(
+            Math.random()*(i+1)
+        );
 
-        const j = Math.floor(Math.random() * (i + 1));
-
-        [array[i], array[j]] = [array[j], array[i]];
+        [array[i],array[j]] =
+        [array[j],array[i]];
     }
 
     return array;
 }
 
-/* =====================================
-   SPEECH
-===================================== */
+function speak(
+    text,
+    callback=null
+){
 
-function speak(text, callback = null) {
+    if(
+        !("speechSynthesis" in window)
+    ){
 
-    try {
-
-        window.speechSynthesis.cancel();
-
-        const utterance =
-            new SpeechSynthesisUtterance(text);
-
-        utterance.rate = 0.85;
-        utterance.pitch = 1;
-
-        if (callback) {
-            utterance.onend = callback;
-        }
-
-        window.speechSynthesis.speak(utterance);
-
-    } catch (error) {
-
-        if (callback) {
+        if(callback){
             callback();
         }
-    }
-}
 
-/* =====================================
-   BUILD WORD ORDER
+        return;
+    }
+
+    try{
+
+        speechSynthesis.cancel();
+
+        const utterance =
+        new SpeechSynthesisUtterance(
+            text
+        );
+
+        utterance.rate = 0.9;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+
+        if(callback){
+
+            utterance.onend =
+            callback;
+
+        }
+
+        speechSynthesis.speak(
+            utterance
+        );
+
+    }catch(error){
+
+        if(callback){
+            callback();
+        }
+
+    }
+}/* =====================================
+   BUILD WORD SEQUENCE
 ===================================== */
 
-function buildWordSequence() {
+function buildWordSequence(){
 
-    const atPool = shuffle([...atWords]);
-    const anPool = shuffle([...anWords]);
+    const atPool =
+    shuffle([...atWords]);
+
+    const anPool =
+    shuffle([...anWords]);
 
     const pattern =
-        patterns[
-            Math.floor(
-                Math.random() * patterns.length
-            )
-        ];
+    patterns[
+        Math.floor(
+            Math.random() *
+            patterns.length
+        )
+    ];
 
     gameWords = [];
 
-    while (atPool.length || anPool.length) {
+    while(
+        atPool.length ||
+        anPool.length
+    ){
 
-        for (const family of pattern) {
+        for(
+            const family
+            of pattern
+        ){
 
-            if (family === "at" && atPool.length) {
-                gameWords.push(atPool.shift());
+            if(
+                family === "at" &&
+                atPool.length
+            ){
+
+                gameWords.push(
+                    atPool.shift()
+                );
+
             }
 
-            if (family === "an" && anPool.length) {
-                gameWords.push(anPool.shift());
+            if(
+                family === "an" &&
+                anPool.length
+            ){
+
+                gameWords.push(
+                    anPool.shift()
+                );
+
             }
+
         }
+
     }
+
 }
 
 /* =====================================
    LOAD WORD
 ===================================== */
 
-function loadWord() {
+function loadWord(){
 
-    if (currentIndex >= gameWords.length) {
+    if(
+        currentIndex >=
+        gameWords.length
+    ){
 
         finishGame();
+
         return;
     }
 
-    const current = gameWords[currentIndex];
+    const current =
+    gameWords[currentIndex];
 
-    wordCard.textContent = current.word;
+    wordCard.textContent =
+    current.word;
 
-    wordImage.src = current.image;
+    wordImage.src =
+    current.image;
 
     scoreText.textContent =
-        `Score: ${score} / ${gameWords.length}`;
 
-    setTimeout(() => {
-        speak(current.word);
-    }, 300);
+    `Score: ${score} / ${gameWords.length}`;
+
+    setTimeout(()=>{
+
+        speak(
+            current.word
+        );
+
+    },300);
+
 }
 
 /* =====================================
    FEEDBACK
 ===================================== */
 
-function showFeedback(correct) {
+function showFeedback(correct){
 
-    feedback.style.display = "flex";
+    feedback.style.display =
+    "flex";
 
-    if (correct) {
+    if(correct){
 
-        feedback.className = "correct";
-        feedback.innerHTML = "👏👏👏";
+        feedback.className =
+        "correct";
 
-        correctSound.currentTime = 0;
+        feedback.innerHTML =
+        "👏👏👏";
+
+        correctSound.currentTime =
+        0;
+
         correctSound.play();
 
-    } else {
+    }
+    else{
 
-        feedback.className = "wrong";
-        feedback.innerHTML = "❌";
+        feedback.className =
+        "wrong";
 
-        wrongSound.currentTime = 0;
+        feedback.innerHTML =
+        "❌";
+
+        wrongSound.currentTime =
+        0;
+
         wrongSound.play();
+
     }
 
-    setTimeout(() => {
+    setTimeout(()=>{
 
-        feedback.style.display = "none";
+        feedback.style.display =
+        "none";
 
-    }, 800);
+    },800);
+
 }
 
 /* =====================================
    CHECK ANSWER
 ===================================== */
 
-function checkAnswer(family) {
+function checkAnswer(family){
 
-    const current = gameWords[currentIndex];
+    const current =
+    gameWords[currentIndex];
 
-    if (current.family === family) {
+    if(
+        current.family ===
+        family
+    ){
 
         score++;
 
@@ -219,22 +309,31 @@ function checkAnswer(family) {
 
         currentIndex++;
 
-        setTimeout(loadWord, 900);
+        setTimeout(()=>{
 
-    } else {
+            loadWord();
+
+        },900);
+
+    }
+    else{
 
         showFeedback(false);
-    }
-}
 
-/* =====================================
-   HIT TEST
+    }
+
+}/* =====================================
+   BASKET HIT TEST
 ===================================== */
 
-function isInside(element, x, y) {
+function isInsideBasket(
+    basket,
+    x,
+    y
+){
 
     const rect =
-        element.getBoundingClientRect();
+    basket.getBoundingClientRect();
 
     return (
         x >= rect.left &&
@@ -242,79 +341,105 @@ function isInside(element, x, y) {
         y >= rect.top &&
         y <= rect.bottom
     );
+
 }
 
 /* =====================================
-   DRAG + TOUCH
+   DRAG + TOUCH SUPPORT
 ===================================== */
 
-wordCard.addEventListener("pointerdown", (e) => {
+wordCard.addEventListener(
+    "pointerdown",
+    (e)=>{
 
-    dragging = true;
+        dragging = true;
 
-    wordCard.setPointerCapture(e.pointerId);
-});
+        wordCard.setPointerCapture(
+            e.pointerId
+        );
 
-wordCard.addEventListener("pointermove", (e) => {
+    }
+);
 
-    if (!dragging) return;
+wordCard.addEventListener(
+    "pointermove",
+    (e)=>{
 
-    wordCard.style.position = "fixed";
-    wordCard.style.zIndex = "5000";
+        if(!dragging) return;
 
-    wordCard.style.left =
+        wordCard.style.position =
+        "fixed";
+
+        wordCard.style.zIndex =
+        "5000";
+
+        wordCard.style.left =
         (e.clientX - 60) + "px";
 
-    wordCard.style.top =
+        wordCard.style.top =
         (e.clientY - 30) + "px";
-});
 
-wordCard.addEventListener("pointerup", (e) => {
-
-    dragging = false;
-
-    if (
-        isInside(
-            atBasket,
-            e.clientX,
-            e.clientY
-        )
-    ) {
-        checkAnswer("at");
     }
+);
 
-    else if (
-        isInside(
-            anBasket,
-            e.clientX,
-            e.clientY
-        )
-    ) {
-        checkAnswer("an");
+wordCard.addEventListener(
+    "pointerup",
+    (e)=>{
+
+        dragging = false;
+
+        if(
+            isInsideBasket(
+                atBasket,
+                e.clientX,
+                e.clientY
+            )
+        ){
+
+            checkAnswer("at");
+
+        }
+        else if(
+            isInsideBasket(
+                anBasket,
+                e.clientX,
+                e.clientY
+            )
+        ){
+
+            checkAnswer("an");
+
+        }
+
+        wordCard.style.position =
+        "static";
+
+        wordCard.style.zIndex =
+        "1";
+
     }
-
-    wordCard.style.position = "static";
-    wordCard.style.zIndex = "1";
-});
+);
 
 /* =====================================
    END GAME
 ===================================== */
 
-function finishGame() {
+function finishGame(){
 
-    endScreen.style.display = "flex";
+    endScreen.style.display =
+    "flex";
 
     speak(
         "Fantastic! You sorted all the words."
     );
+
 }
 
 /* =====================================
    START GAME
 ===================================== */
 
-function startGame() {
+function startGame(){
 
     buildWordSequence();
 
@@ -322,40 +447,92 @@ function startGame() {
     score = 0;
 
     scoreText.textContent =
-        "Score: 0 / 18";
+    "Score: 0 / 18";
 
     loadWord();
 
-    const intro =
+    if(instructionAudio){
 
-        "Welcome to Word Family Train Adventure. " +
-        "Drag and drop the word into the correct basket. " +
-        "Put at words in the at basket. " +
-        "Put an words in the an basket. " +
-        "Let's begin.";
+        instructionAudio.currentTime =
+        0;
 
-    speak(intro, () => {
+        instructionAudio.play()
+        .catch(()=>{
 
-        backgroundMusic.volume = 0.2;
+            const intro =
 
-        backgroundMusic.play()
-            .catch(() => { });
-    });
+            "Welcome to Word Family. " +
+
+            "Drag and drop the word into the correct basket. " +
+
+            "Put at words in the at basket. " +
+
+            "Put an words in the an basket. " +
+
+            "Let's begin.";
+
+            speak(
+                intro,
+                ()=>{
+
+                    backgroundMusic.volume =
+                    0.2;
+
+                    backgroundMusic.play()
+                    .catch(()=>{});
+
+                }
+            );
+
+        });
+
+        instructionAudio.onended =
+        ()=>{
+
+            backgroundMusic.volume =
+            0.2;
+
+            backgroundMusic.play()
+            .catch(()=>{});
+
+        };
+
+    }
+    else{
+
+        speak(
+            "Welcome to Word Family.",
+            ()=>{
+
+                backgroundMusic.volume =
+                0.2;
+
+                backgroundMusic.play()
+                .catch(()=>{});
+
+            }
+        );
+
+    }
+
 }
 
 /* =====================================
-   REPLAY
+   REPLAY BUTTON
 ===================================== */
 
 replayBtn.addEventListener(
     "click",
-    () => {
+    ()=>{
 
-        endScreen.style.display = "none";
+        endScreen.style.display =
+        "none";
 
-        backgroundMusic.currentTime = 0;
+        backgroundMusic.currentTime =
+        0;
 
         startGame();
+
     }
 );
 
@@ -363,24 +540,31 @@ replayBtn.addEventListener(
    SPLASH SCREEN
 ===================================== */
 
-window.addEventListener("load", () => {
+window.addEventListener(
+    "load",
+    ()=>{
 
-    gameContainer.style.display = "none";
+        gameContainer.style.display =
+        "none";
 
-    setTimeout(() => {
+        setTimeout(()=>{
 
-        splashScreen.style.opacity = "0";
+            splashScreen.style.opacity =
+            "0";
 
-        setTimeout(() => {
+            setTimeout(()=>{
 
-            splashScreen.style.display = "none";
+                splashScreen.style.display =
+                "none";
 
-            gameContainer.style.display =
+                gameContainer.style.display =
                 "flex";
 
-            startGame();
+                startGame();
 
-        }, 1000);
+            },1000);
 
-    }, 5000);
-});
+        },5000);
+
+    }
+);
